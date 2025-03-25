@@ -43,7 +43,7 @@ def generate_colormap(num_colors):
     colormap = plt.get_cmap("hsv", num_colors)
     color_dict = {}
     inds = np.arange(num_colors)
-    np.random.seed(42)
+    np.random.seed(1)
     inds = np.random.permutation(inds)
     for i in range(num_colors):
         color_name = f"color_{i}"
@@ -68,9 +68,14 @@ def mat2qtvec(mat: torch.Tensor) -> np.ndarray:
 
 
 def get_inverse_transform(s, R, t) -> torch.Tensor:
+    """ 
+    input matrix of {RsP + st} is [R, t, 1/s],
+    and it's inverse is [R.T, -R.T @ s*t, s]
+    """
     mat = np.eye(4)
-    mat[:3, :3] = R.T / s
-    mat[:3, 3] = - R.T @ t / s
+    mat[:3, :3] = R.T
+    mat[:3, 3] = - R.T @ (s*t)
+    mat[-1, -1] = s
     return torch.from_numpy(mat).float()
 
 
@@ -114,10 +119,24 @@ def registration(reg_path):
     for model_vid, model_info, clr in zip(model_infos.keys(), model_infos.values(), colors.values()):
         model_path = model_prefix + model_vid + model_suffix
         print(f'loading {model_path}')
+        # if model_vid.startswith('P01_'):
+        if not (model_vid == 'P01_14' or model_vid == 'P01_02'):
+        # if not (model_vid == 'P03_04' or model_vid == 'P03_05'):
+            # if not model_vid == 'P30_101':
+            #     print("skip")
+            continue
         with open(model_path) as fp:
             model = ujson.load(fp)
             points = np.asarray(model['points'])
+
             images = np.asarray([im for im in model['images'].values()])
+            # if model_vid == 'P30_107':
+            #     _img = model['images'][f'frame_{122962:010d}.jpg']
+            #     images = np.asarray([_img])
+            # if model_vid == 'P30_101':
+            #     _img = model['images'][f'frame_{15450:010d}.jpg']
+            #     images = np.asarray([_img])
+
             # if 'line' in model:
             #     line = np.asarray(model['line']).reshape(-1, 3)
             # else:
@@ -134,7 +153,7 @@ def registration(reg_path):
         all_points.extend(new_points.tolist())
 
         w2c = qtvec2mat(images[:, :4], images[:, 4:])
-        inv_transf = get_inverse_transform(scale, rot, transl)
+        inv_transf = get_inverse_transform(s=scale, R=rot, t=transl/scale)  # {RsP+t} == {RsP + s*(t/s)}
         new_w2c = w2c @ inv_transf
         new_images = mat2qtvec(new_w2c)
         image_colors = np.float32([clr]).repeat(new_images.shape[0], axis=0)

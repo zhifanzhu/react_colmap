@@ -37,7 +37,8 @@ function Registration() {
 
   useEffect(() => {
     // const job = 'P04AB';
-    const job = 'P01B';
+    // const job = 'P01B';
+    const job = 'P01A';
     // setRegFile('colmap_projects/registration/P04A/P04A.json')
     // const regFile = 'colmap_projects/registration/P04A/P04A_01_33_good.json';
     const regFile = `colmap_projects/registration/${job}/${job}.json`;
@@ -92,8 +93,8 @@ function Registration() {
           rotateSpeed={2.0}/>
         <axesHelper args={[1]} />
 
-        {/* <CameraPrimitives size={0.1} cameras={colmapCameras} hideCameras={hideCameras}/> */}
-        <Points3D size={0.01} points={colmapPoints}/>
+        <CameraPrimitives size={0.15} cameras={colmapCameras} hideCameras={hideCameras}/>
+        <Points3D size={1.0} points={colmapPoints}/>
         {/* <SimpleLines lines={lines}/> */}
       </Canvas>
     </div>

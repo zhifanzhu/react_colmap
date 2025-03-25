@@ -11,6 +11,19 @@ const hostname = window.location.hostname;
 const port = 5001;
 
 
+function Dummy() {
+  const { camera } = useThree();
+
+  useEffect(() => {
+    camera.position.set(5.191492201997082, 13.22890506900179, -13.026706921870169);
+    camera.rotation.set(-2.561939582688825, 0.116014612657904, 0.06161117814921492);
+    camera.up.set(-0.12504418338304474, -0.45870001225757945, -0.8797489704210854);
+  }, [camera]);
+
+  return <></>
+}
+
+
 function SceneApp() {
   // console.log(hostname);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -29,6 +42,7 @@ function SceneApp() {
   useEffect(() => {
     let subpath;
     subpath = 'colmap_projects/json_models/P02_01_skeletons.json';
+    subpath = 'colmap_projects/json_models/P30_101_skeletons.json';
     fetch(`http://${hostname}:${port}/model/${subpath}`)
     .then(response => response.json())
     .then(model => {
@@ -65,12 +79,13 @@ function SceneApp() {
       <Canvas dpr={[1, 2]}>
         <color args={[0x0000000]} attach="background" />
         <ambientLight />
+        <Dummy />
         {/* <OrbitControls enableDamping={false} minDistance={0.5} maxDistance={100}/> */}
         <TrackballControls enabled={trackBallEnabled} enableDamping={false} minDistance={0.5} maxDistance={100}
           rotateSpeed={2.0}/>
         <axesHelper args={[1]} />
 
-        <CameraPrimitives size={0.1} cameras={colmapCameras} hideCameras={hideCameras}/>
+        <CameraPrimitives size={0.15} cameras={colmapCameras} hideCameras={hideCameras}/>
         <Points3D size={0.01} points={colmapPoints}/>
         <MovableLine control_enabled={!trackBallEnabled}/>
       </Canvas>
